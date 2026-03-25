@@ -30,7 +30,7 @@ function Navbar() {
           </li>
           <li>
             <Link
-              to="/clubs"
+              to="/home"
               className="rounded-lg px-4 py-2 text-sm font-medium text-blue-100 transition hover:bg-white/10 hover:text-white"
             >
               Clubs
@@ -38,7 +38,7 @@ function Navbar() {
           </li>
           <li>
             <Link
-              to="/student-dashboard"
+              to="/user-dashboard"
               className="rounded-lg px-4 py-2 text-sm font-medium text-blue-100 transition hover:bg-white/10 hover:text-white"
             >
               Student

@@ -1,6 +1,28 @@
 import { Users, CalendarDays, Trophy, BookOpen, ArrowRight } from "lucide-react";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import Footer from "../components/common/Footer";
+import Button from "../components/common/Button";
 
 function Home() {
+  const navigate = useNavigate();
+  const [profileMenuOpen, setProfileMenuOpen] = useState(false);
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
+  const userInfo = localStorage.getItem("userInfo");
+  let parsedUser = null;
+  try {
+    parsedUser = userInfo ? JSON.parse(userInfo) : null;
+  } catch {
+    parsedUser = null;
+  }
+  const isLoggedInUser = parsedUser?.role === "user";
+  const profileImage = parsedUser?.profilePhoto ? `${API_BASE_URL}${parsedUser.profilePhoto}` : "";
+
+  const handleLogout = () => {
+    localStorage.removeItem("userInfo");
+    navigate("/login");
+  };
+
   const features = [
     {
       icon: <Users className="w-8 h-8 text-indigo-600" />,
@@ -44,7 +66,97 @@ function Home() {
   ];
 
   return (
-    <main className="bg-gray-50 text-gray-800">
+    <>
+      <nav className="sticky top-0 z-50 w-full border-b border-white/10 bg-gradient-to-r from-indigo-900 via-blue-800 to-indigo-700 shadow-lg backdrop-blur">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4 lg:px-10">
+          <div className="text-white">
+            <h1 className="text-xl font-bold tracking-wide md:text-2xl">Campus Society</h1>
+            <p className="text-xs text-blue-100">Connect. Learn. Grow.</p>
+          </div>
+          <ul className="hidden items-center gap-3 md:flex">
+            <li>
+              <button
+                onClick={() => navigate("/home")}
+                className="rounded-lg px-4 py-2 text-sm font-medium text-blue-100 transition hover:bg-white/10 hover:text-white"
+              >
+                Home
+              </button>
+            </li>
+            {isLoggedInUser ? (
+              <>
+                <li className="px-2 text-sm font-medium text-blue-100">Welcome, {parsedUser.name}</li>
+                <li>
+                  <button
+                    onClick={handleLogout}
+                    className="rounded-full border border-white/40 px-5 py-2 text-sm font-semibold text-white transition hover:bg-white hover:text-indigo-800"
+                  >
+                    Logout
+                  </button>
+                </li>
+                <li>
+                  <div className="relative">
+                    <button
+                      onClick={() => setProfileMenuOpen((prev) => !prev)}
+                      className="h-10 w-10 overflow-hidden rounded-full border-2 border-white/60"
+                      title="Profile"
+                    >
+                      {profileImage ? (
+                        <img src={profileImage} alt="Profile" className="h-full w-full object-cover" />
+                      ) : (
+                        <div className="flex h-full w-full items-center justify-center bg-white/20 text-sm font-bold text-white">
+                          {parsedUser.name?.charAt(0)?.toUpperCase() || "U"}
+                        </div>
+                      )}
+                    </button>
+                    {profileMenuOpen && (
+                      <div className="absolute right-0 top-12 w-44 rounded-xl border border-gray-100 bg-white p-2 text-gray-700 shadow-xl">
+                        <button
+                          onClick={() => {
+                            setProfileMenuOpen(false);
+                            navigate("/user-dashboard");
+                          }}
+                          className="w-full rounded-md px-3 py-2 text-left text-sm hover:bg-gray-100"
+                        >
+                          User Dashboard
+                        </button>
+                        <button
+                          onClick={() => {
+                            setProfileMenuOpen(false);
+                            navigate("/user-dashboard");
+                          }}
+                          className="w-full rounded-md px-3 py-2 text-left text-sm hover:bg-gray-100"
+                        >
+                          Edit Profile
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </li>
+              </>
+            ) : (
+              <>
+                <li>
+                  <button
+                    onClick={() => navigate("/register")}
+                    className="rounded-full bg-white px-5 py-2 text-sm font-semibold text-indigo-800 shadow-md transition hover:scale-105 hover:bg-blue-50"
+                  >
+                    Register
+                  </button>
+                </li>
+                <li>
+                  <button
+                    onClick={() => navigate("/login")}
+                    className="rounded-full border border-white/40 px-5 py-2 text-sm font-semibold text-white transition hover:bg-white hover:text-indigo-800"
+                  >
+                    Login
+                  </button>
+                </li>
+              </>
+            )}
+          </ul>
+        </div>
+      </nav>
+      <main className="bg-gray-50 text-gray-800">
       {/* Hero Section */}
       <section className="relative overflow-hidden bg-gradient-to-r from-indigo-700 via-blue-700 to-indigo-900 text-white">
         <div className="max-w-7xl mx-auto px-6 md:px-12 py-20 md:py-28 grid md:grid-cols-2 gap-10 items-center">
@@ -61,10 +173,13 @@ function Home() {
             </p>
 
             <div className="flex flex-wrap gap-4">
-              <button className="bg-white text-indigo-700 font-semibold px-6 py-3 rounded-xl shadow-md hover:bg-gray-100 transition">
+              <Button onClick={() => navigate(isLoggedInUser ? "/home" : "/register")}>
                 Explore Clubs
-              </button>
-              <button className="border border-white px-6 py-3 rounded-xl font-semibold hover:bg-white hover:text-indigo-700 transition">
+              </Button>
+              <button
+                className="border border-white px-6 py-3 rounded-xl font-semibold hover:bg-white hover:text-indigo-700 transition"
+                onClick={() => navigate(isLoggedInUser ? "/home" : "/login")}
+              >
                 View Events
               </button>
             </div>
@@ -166,13 +281,18 @@ function Home() {
               Join clubs, participate in events, and connect with fellow students
               through one beautiful platform.
             </p>
-            <button className="bg-white text-indigo-700 font-semibold px-8 py-3 rounded-xl hover:bg-gray-100 transition">
+            <button
+              className="bg-white text-indigo-700 font-semibold px-8 py-3 rounded-xl hover:bg-gray-100 transition"
+              onClick={() => navigate(isLoggedInUser ? "/home" : "/login")}
+            >
               Get Started
             </button>
           </div>
         </div>
       </section>
-    </main>
+      </main>
+      <Footer />
+    </>
   );
 }
 
